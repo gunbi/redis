@@ -1,0 +1,10 @@
+/target/
+apollo-monitor.iml
+.arcconfig
+.idea
+.settings
+.classpath
+.project
+.DS_Store
+output
+var
