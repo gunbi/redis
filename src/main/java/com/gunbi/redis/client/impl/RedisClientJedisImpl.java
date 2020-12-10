@@ -1,6 +1,8 @@
-package com.gunbi.redis.client;
+package com.gunbi.redis.client.impl;
 
 import com.google.common.collect.Maps;
+import com.gunbi.redis.client.base.Constants;
+import com.gunbi.redis.client.configuration.RedisClientConfiguration;
 import com.gunbi.redis.utils.GZIPUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
@@ -18,27 +20,25 @@ import java.util.function.Function;
  *
  * @author hanzhong
  */
+
+/**
+ * TODO
+ */
 @Slf4j
 public class RedisClientJedisImpl {
 
-    private static final int REDIS_POOL_MAX_ACTIVE = 10;
-    private static final int REDIS_POOL_MAX_WAIT = 500;
-    private static final int REDIS_POOL_MAX_IDLE = 5;
-    private static final int REDIS_POOL_MIN_IDLE = 1;
-    private static final int LOCK_TIME_OUT = 10 * 6000;
-    private static final String LOCK_SUCCESS = "OK";
     private static JedisPool jedisPool = null;
 
-    public RedisClientJedisImpl(String host, int port, int timeout) {
-        jedisPool = new JedisPool(poolConfig(), host, port, timeout);
+    public RedisClientJedisImpl(RedisClientConfiguration configuration) {
+        jedisPool = new JedisPool(poolConfig(), configuration.getHost(), configuration.getPort(), configuration.getTimeout());
     }
 
     private static JedisPoolConfig poolConfig() {
         JedisPoolConfig poolConfig = new JedisPoolConfig();
-        poolConfig.setMaxIdle(REDIS_POOL_MAX_IDLE);
-        poolConfig.setMaxTotal(REDIS_POOL_MAX_ACTIVE);
-        poolConfig.setMaxWaitMillis(REDIS_POOL_MAX_WAIT);
-        poolConfig.setMinIdle(REDIS_POOL_MIN_IDLE);
+        poolConfig.setMaxIdle(Constants.REDIS_POOL_MAX_IDLE);
+        poolConfig.setMaxTotal(Constants.REDIS_POOL_MAX_ACTIVE);
+        poolConfig.setMaxWaitMillis(Constants.REDIS_POOL_MAX_WAIT);
+        poolConfig.setMinIdle(Constants.REDIS_POOL_MIN_IDLE);
         return poolConfig;
     }
 
@@ -87,8 +87,8 @@ public class RedisClientJedisImpl {
     public boolean lock(String lockName, String identifier) {
         return this.execute(jedis -> {
             //NX：不存在则Set
-            String result = jedis.set(lockName, identifier, SetParams.setParams().nx().px(LOCK_TIME_OUT));
-            return result != null && result.equals(LOCK_SUCCESS);
+            String result = jedis.set(lockName, identifier, SetParams.setParams().nx().px(Constants.LOCK_TIME_OUT));
+            return result != null && result.equals(Constants.OPERATION_SUCCESS);
         });
     }
 
